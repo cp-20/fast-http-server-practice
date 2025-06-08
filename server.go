@@ -105,6 +105,12 @@ func getMethod(firstLine []byte) []byte {
 	return firstLine[:9]
 }
 
+var readerPool = sync.Pool{
+	New: func() interface{} {
+		return bufio.NewReader(nil)
+	},
+}
+
 var bufferPool = sync.Pool{
 	New: func() interface{} {
 		return new(bytes.Buffer)
@@ -115,7 +121,9 @@ func handleConn(conn net.Conn, handler RequestHandler) error {
 	defer conn.Close()
 	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
-	reader := bufio.NewReader(conn)
+	reader := readerPool.Get().(*bufio.Reader)
+	reader.Reset(conn)
+	defer readerPool.Put(reader)
 
 	// buffer for response
 	resBuf := bufferPool.Get().(*bytes.Buffer)
