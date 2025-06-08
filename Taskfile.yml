@@ -1,0 +1,13 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  bench-net:
+    cmds:
+      - go test -bench=NetHTTPServerGet -benchmem -benchtime=10s
+    silent: true
+  bench-fast:
+    cmds:
+      - go test -bench=kServerGet -benchmem -benchtime=10s -cpuprofile cpu.prof -memprofile mem.prof
+    silent: true
