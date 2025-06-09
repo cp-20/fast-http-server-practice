@@ -1,3 +1,4 @@
+// filepath: /home/cp20/ghq/github.com/cp-20/fast-http-server-practice/server.go
 package fast_http_server_practice
 
 import (
@@ -20,7 +21,7 @@ var (
 	lineBreak             = []byte("\r\n")
 	headerContentLength   = []byte("Content-Length: ")
 	headerContentType     = []byte("Content-Type: ")
-	headerConnectionClose = []byte("Connection: close")
+	headerConnectionClose = []byte("Connection: close\r\n")
 )
 
 type requestContextState struct {
@@ -60,7 +61,6 @@ func (c *RequestCtx) Success(contentType string, body []byte) {
 
 func (c *RequestCtx) SetConnectionClose() {
 	c.state.resHeadersBuilder.Write(headerConnectionClose)
-	c.state.resHeadersBuilder.Write(lineBreak)
 	c.state.closeConn = true
 }
 
@@ -203,7 +203,6 @@ func handleConn(conn net.Conn, handler RequestHandler) error {
 
 		resBuf.Reset()
 		resBuf.Write(resMain)
-		resBuf.Write(lineBreak)
 		resBuf.Write(reqCtx.state.resHeadersBuilder.Bytes())
 		resBuf.Write(lineBreak)
 		resBuf.Write(resBody)
