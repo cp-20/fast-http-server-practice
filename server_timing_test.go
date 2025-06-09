@@ -124,7 +124,9 @@ func (c *fakeServerConn) RemoteAddr() net.Addr {
 
 func (c *fakeServerConn) Close() error {
 	if atomic.AddUint32(&c.closed, 1) == 1 {
-		c.ln.ch <- c
+		// c.ln.ch <- c
+		c.ln.activeConns.Add(-1)
+		c.ln.connPool.Put(c)
 	}
 	return nil
 }
@@ -138,7 +140,8 @@ func (c *fakeServerConn) SetWriteDeadline(t time.Time) error {
 }
 
 type fakeListener struct {
-	ch              chan *fakeServerConn
+	activeConns     atomic.Int64
+	connPool        sync.Pool
 	done            chan struct{}
 	request         []byte
 	requestsCount   int
@@ -151,7 +154,7 @@ func (ln *fakeListener) Accept() (net.Conn, error) {
 	ln.lock.Lock()
 	if ln.requestsCount == 0 {
 		ln.lock.Unlock()
-		for len(ln.ch) < cap(ln.ch) {
+		for ln.activeConns.Load() > 0 {
 			time.Sleep(10 * time.Millisecond)
 		}
 		ln.lock.Lock()
@@ -162,14 +165,12 @@ func (ln *fakeListener) Accept() (net.Conn, error) {
 		ln.lock.Unlock()
 		return nil, io.EOF
 	}
-	requestsCount := ln.requestsPerConn
-	if requestsCount > ln.requestsCount {
-		requestsCount = ln.requestsCount
-	}
+	requestsCount := min(ln.requestsPerConn, ln.requestsCount)
 	ln.requestsCount -= requestsCount
 	ln.lock.Unlock()
 
-	c := <-ln.ch
+	c := ln.connPool.Get().(*fakeServerConn)
+	ln.activeConns.Add(1)
 	c.requestsCount = requestsCount
 	c.closed = 0
 	c.pos = 0
@@ -190,14 +191,16 @@ func newFakeListener(requestsCount, clientsCount, requestsPerConn int, request s
 		requestsCount:   requestsCount,
 		requestsPerConn: requestsPerConn,
 		request:         []byte(request),
-		ch:              make(chan *fakeServerConn, clientsCount),
 		done:            make(chan struct{}),
 	}
-	for i := 0; i < clientsCount; i++ {
-		ln.ch <- &fakeServerConn{
+	ln.connPool.New = func() interface{} {
+		return &fakeServerConn{
 			ln: ln,
 		}
 	}
+	// for i := 0; i < clientsCount; i++ {
+	// 	_ = ln.connPool.Get().(*fakeServerConn)
+	// }
 	return ln
 }
 

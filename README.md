@@ -12,14 +12,14 @@ goos: linux
 goarch: amd64
 pkg: github.com/cp-20/fast-http-server-practice
 cpu: AMD Ryzen 9 6900HS with Radeon Graphics        
-BenchmarkServerGet1ReqPerConn-16                         5672046              1996 ns/op             170 B/op          7 allocs/op
-BenchmarkServerGet2ReqPerConn-16                        12485984              1056 ns/op              85 B/op          3 allocs/op
-BenchmarkServerGet10ReqPerConn-16                       43329940               252.6 ns/op            17 B/op          0 allocs/op
-BenchmarkServerGet10KReqPerConn-16                      206215317               51.26 ns/op            0 B/op          0 allocs/op
-BenchmarkServerGet1ReqPerConn10KClients-16              11965674               947.5 ns/op           173 B/op          7 allocs/op
-BenchmarkServerGet2ReqPerConn10KClients-16              25569140               475.2 ns/op            85 B/op          3 allocs/op
-BenchmarkServerGet10ReqPerConn10KClients-16             100000000              116.5 ns/op            17 B/op          0 allocs/op
-BenchmarkServerGet100ReqPerConn10KClients-16            249859675               44.87 ns/op            1 B/op          0 allocs/op
+BenchmarkServerGet1ReqPerConn-16                        21024801               546.1 ns/op           184 B/op          7 allocs/op
+BenchmarkServerGet2ReqPerConn-16                        45605458               278.3 ns/op            90 B/op          3 allocs/op
+BenchmarkServerGet10ReqPerConn-16                       130156720               87.91 ns/op           17 B/op          0 allocs/op
+BenchmarkServerGet10KReqPerConn-16                      308223213               39.18 ns/op            0 B/op          0 allocs/op
+BenchmarkServerGet1ReqPerConn10KClients-16              21062284               601.9 ns/op           171 B/op          7 allocs/op
+BenchmarkServerGet2ReqPerConn10KClients-16              42220412               330.0 ns/op            85 B/op          3 allocs/op
+BenchmarkServerGet10ReqPerConn10KClients-16             139612822               89.14 ns/op           17 B/op          0 allocs/op
+BenchmarkServerGet100ReqPerConn10KClients-16            262263482               47.56 ns/op            1 B/op          0 allocs/op
 ```
 
 ### net/http
